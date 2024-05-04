@@ -22,7 +22,7 @@ const DOM = {
 
   sendTopicMessageInput: () => document.getElementById('send-topic-message-input'),
   sendTopicMessageButton: () => document.getElementById('send-topic-message-button'),
-
+  sendTrainIsHereButton: () => document.getElementById('send-train-is-here-button'),
   output: () => document.getElementById('output'),
 
   listeningAddressesList: () => document.getElementById('listening-addresses'),
@@ -142,6 +142,7 @@ DOM.subscribeTopicButton().onclick = async () => {
 
   DOM.sendTopicMessageInput().disabled = undefined
   DOM.sendTopicMessageButton().disabled = undefined
+  DOM.sendTrainIsHereButton().disabled = undefined
 }
 
 // send message to topic
@@ -151,6 +152,20 @@ DOM.sendTopicMessageButton().onclick = async () => {
   appendOutput(`Sending message '${clean(message)}'`)
 
   await libp2p.services.pubsub.publish(topic, fromString(message))
+}
+
+// send message to topic with peer ID
+DOM.sendTrainIsHereButton().onclick = async () => {
+  const topic = DOM.subscribeTopicInput().value;
+  const message = `train is ${libp2p.peerId.toString()}`;
+  appendOutput(`Sending message '${clean(message)}'`);
+
+  await libp2p.services.pubsub.publish(topic, fromString(message));
+  DOM.peerId().style.color = 'blue';
+  const peerElements = DOM.peerConnectionsList().children;
+  for (let i = 0; i < peerElements.length; i++) {
+    peerElements[i].style.color = 'black';
+  }
 }
 
 // update topic peers
@@ -166,10 +181,32 @@ setInterval(() => {
   DOM.topicPeerList().replaceChildren(...peerList)
 }, 500)
 
-libp2p.services.pubsub.addEventListener('message', event => {
-  const topic = event.detail.topic
-  const message = toString(event.detail.data)
 
-  appendOutput(`Message received on topic '${topic}'`)
-  appendOutput(message)
-})
+libp2p.services.pubsub.addEventListener('message', event => {
+  const topic = event.detail.topic;
+  const message = toString(event.detail.data);
+  const messageContent = message.split(' ');
+
+  appendOutput(`Message received on topic '${topic}'`);
+  appendOutput(message);
+
+  if (messageContent[0] === 'train' && messageContent[1] === 'is') {
+    const receivedPeerId = messageContent[2].trim();
+    console.log(`Received Peer ID: ${receivedPeerId}`);
+    DOM.peerId().style.color = 'black';
+    const peerElements = DOM.peerConnectionsList().children;
+    console.log(`Total peers listed: ${peerElements.length}`);
+
+    for (let i = 0; i < peerElements.length; i++) {
+      const currentPeerText = peerElements[i].textContent.trim();
+      console.log(`Checking peer: ${currentPeerText}`);
+
+      if (currentPeerText.includes(receivedPeerId)) {
+        console.log(`Match found, changing color for: ${currentPeerText}`);
+        peerElements[i].style.color = 'blue';
+      } else {
+        peerElements[i].style.color = 'black';
+      }
+    }
+  }
+});

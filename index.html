@@ -20,24 +20,23 @@
       input[type="text"] {
         width: 800px;
       }
+      ul#topic-peers li {
+      color: black; /* Default color */
+      }
     </style>
   </head>
   <body>
-    <h1>libp2p Browser PubSub example</h1>
-    <p>This example demonstrates the pubsub API running in a browser</p>
-    <ol>
-      <li>Start a relay using the command line: <pre>$ node ./relay.js
-Relay listening on multiaddr(s):  [
-  '${multiaddr}'
-]
-      </pre></li>
-      <li>Copy the relay's multiaddr and use the "Dial Multaddr" section to dial the relay</li>
-      <li>Wait for a WebRTC address to appear in the "Listening Addresses" area</li>
-      <li>Open the same page in another browser window</li>
-      <li>Use the "Dial Multiaddr" section in the second window to dial the WebRTC address from the first</li>
-      <li>Subscribe both windows to the same topic using the "PubSub" section</li>
-      <li>Send messages between the windows using the "PubSub" section</li>
-    </ol>
+    <h1>MTA station p2p</h1>
+    <div id="network-graph" style="width: 100%; height: 400px; border: 1px solid black;">
+      <h4>PeerId:</h4>
+      <p id="peer-id"></p>
+      
+      <h4>Connected Peers</h4>
+      <ul id="peer-connections">
+        <li>None</li>
+      </ul>
+    </div>
+    <button id="send-train-is-here-button" disabled="disabled">Train is in this station</button>
     <hr />
     <div>
       <h2>Node</h2>
@@ -45,16 +44,8 @@ Relay listening on multiaddr(s):  [
       <input type="text" id="dial-multiaddr-input" placeholder="/ip4/127.0.0.1/tcp/1234/ws/p2p/123Foo" />
       <button id="dial-multiaddr-button">Connect</button>
 
-      <h4>PeerId</h4>
-      <p id="peer-id"></p>
-
       <h4>Listening Addresses</h4>
       <ul id="listening-addresses">
-        <li>None</li>
-      </ul>
-
-      <h4>Connected Peers</h4>
-      <ul id="peer-connections">
         <li>None</li>
       </ul>
     </div>
@@ -80,5 +71,6 @@ Relay listening on multiaddr(s):  [
       <pre id="output"></pre>
     </div>
     <script type="module" src="./index.js"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   </body>
 </html>

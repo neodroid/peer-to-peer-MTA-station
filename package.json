@@ -31,7 +31,10 @@
     "@libp2p/webrtc": "^4.0.5",
     "@libp2p/websockets": "^8.0.4",
     "@multiformats/multiaddr": "^12.1.11",
+    "@vitejs/plugin-react": "^4.2.1",
     "libp2p": "^1.0.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "vite": "^5.0.4"
   },
   "devDependencies": {
