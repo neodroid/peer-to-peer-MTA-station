@@ -398,3 +398,19 @@ DOM.fetchStationMapButton().onclick = () => {
     fetchStationMap(libp2p.peerId.toString(), newName);
   }
 };
+
+document.getElementById('fetch-data-button').addEventListener('click', async () => {
+  const stationId = document.getElementById('station-id-input').value.trim();
+  if (stationId) {
+    try {
+      console.log('Fetching data for:', stationId);
+      const response = await fetch(`https://e9qx2wlhrh.execute-api.us-east-1.amazonaws.com/dev/${stationId}`);
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  } else {
+    console.error('Please enter a valid station ID');
+  }
+});
