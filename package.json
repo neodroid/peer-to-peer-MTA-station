@@ -13,7 +13,7 @@
   },
   "type": "module",
   "scripts": {
-    "start": "vite --no-open",
+    "start": "vite --host 0.0.0.0 --no-open",
     "build": "vite build",
     "relay": "node relay.js",
     "test:firefox": "npm run build && playwright test --browser=firefox test",
