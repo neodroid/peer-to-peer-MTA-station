@@ -87,7 +87,6 @@ const libp2p = await createLibp2p({
 DOM.peerId().innerText = libp2p.peerId.toString()
 
 function updatePeerList () {
-  // Update connections list
 
   const currentPeers = libp2p.getPeers().map(peerId => peerId.toString());
 
@@ -114,12 +113,8 @@ function updatePeerList () {
       delete stationDict[peerId];
     }
   });
-
-  // Update the station list UI to reflect changes
-  // updateStationListUI();
 }
 
-// update peer connections
 libp2p.addEventListener('connection:open', () => {
   updatePeerList();
   libp2p.getPeers().forEach(peerId => updateStationDict(peerId));
@@ -129,7 +124,6 @@ libp2p.addEventListener('connection:close', () => {
   libp2p.getPeers().forEach(peerId => updateStationDict(peerId, null, false));
 });
 
-// update listening addresses
 libp2p.addEventListener('self:peer:update', () => {
   const multiaddrs = libp2p.getMultiaddrs()
     .map((ma) => {
@@ -140,7 +134,6 @@ libp2p.addEventListener('self:peer:update', () => {
   DOM.listeningAddressesList().replaceChildren(...multiaddrs)
 })
 
-// dial remote peer
 DOM.dialMultiaddrButton().onclick = async () => {
   const ma = multiaddr(DOM.dialMultiaddrInput().value)
   appendOutput(`Dialing '${ma}'`)
@@ -148,7 +141,6 @@ DOM.dialMultiaddrButton().onclick = async () => {
   appendOutput(`Connected to '${ma}'`)
 }
 
-// subscribe to pubsub topic
 DOM.subscribeTopicButton().onclick = async () => {
   const topic = DOM.subscribeTopicInput().value
   appendOutput(`Subscribing to '${clean(topic)}'`)
@@ -163,7 +155,6 @@ DOM.subscribeTopicButton().onclick = async () => {
   DOM.fetchStationMapButton().disabled = undefined
 }
 
-// send message to topic
 DOM.sendTopicMessageButton().onclick = async () => {
   const topic = DOM.subscribeTopicInput().value
   const message = DOM.sendTopicMessageInput().value
@@ -172,7 +163,6 @@ DOM.sendTopicMessageButton().onclick = async () => {
   await libp2p.services.pubsub.publish(topic, fromString(message))
 }
 
-// send message to topic with peer ID
 DOM.sendTrainIsHereButton().onclick = async () => {
   const topic = DOM.subscribeTopicInput().value;
   const message = `train_location ${libp2p.peerId.toString()}`;
@@ -188,7 +178,6 @@ DOM.sendTrainIsHereButton().onclick = async () => {
   updateMapListUI();
 }
 
-// update topic peers
 setInterval(() => {
   const topic = DOM.subscribeTopicInput().value
 
@@ -262,11 +251,8 @@ libp2p.services.pubsub.addEventListener('message', event => {
   }
 });
 
-// Initialize the station dictionary
 const stationDict = {};
 let train_location = null;
-
-// Function to update station dictionary and UI
 function updateStationDict(peerId, name = null, active = false) {
   console.log(`Updating station dict for ${peerId} with name ${name} and active status ${active}`);
   if (!stationDict[peerId]) {
@@ -276,22 +262,9 @@ function updateStationDict(peerId, name = null, active = false) {
     stationDict[peerId].name = name;
   }
   stationDict[peerId].active = active;
-  // updateStationListUI();
 }
 
-// Function to update the station list UI
-// function updateStationListUI() {
-//   const stationListElement = document.getElementById('station-list');
-//   const stationList = Object.keys(stationDict).map(peerId => {
-//     const station = stationDict[peerId];
-//     const el = document.createElement('li');
-//     el.textContent = `${station.name} (Active: ${station.active})`;
-//     return el;
-//   });
-//   stationListElement.replaceChildren(...stationList);
-// }
 
-// Function to handle name change
 function changeStationName(peerId, newName) {
   updateStationDict(peerId, newName);
   const topic = DOM.subscribeTopicInput().value;
@@ -299,7 +272,6 @@ function changeStationName(peerId, newName) {
   libp2p.services.pubsub.publish(topic, fromString(message));
 }
 
-// Example usage: Change station name via UI
 DOM.changeStationNameButton().onclick = () => {
   const newName = prompt("Enter new station name:");
   if (newName) {
@@ -309,10 +281,8 @@ DOM.changeStationNameButton().onclick = () => {
   }
 };
 
-// Initialize the station dictionary
 const stationMap = [];
 
-// Function to update station dictionary and UI
 function updateMap(peerId, peerBefore) {
   console.log(`Updating station map for ${peerId} position to after ${peerBefore}`);
   if (stationMap.length === 0) {
@@ -321,14 +291,11 @@ function updateMap(peerId, peerBefore) {
   } else {
     const index = stationMap.indexOf(peerBefore);
     if (index !== -1) {
-      // Insert peerId right after peerBefore
       stationMap.splice(index + 1, 0, peerId);
     } else {
-      // If peerBefore is not found, you might want to handle this case, e.g., append at the end or log an error
       console.log(`PeerBefore ${peerBefore} not found in the station map.`);
     }
   }
-  // updateStationListUI();
   updateMapListUI();
 }
 
@@ -342,19 +309,16 @@ function updateMapListUI() {
     const displayName = stationDict[peerId] && (stationDict[peerId].name !== peerId) 
                         ? stationDict[peerId].name 
                         : `...${peerId.slice(-4)}`;
-    // Append the train emoji if this is the current train location
     if (peerId === train_location) {
       return `${displayName} 🚇`;
     }
     return displayName;
   }).join(' ----> ');
 
-  // Update the announcement text based on the train's position
   const trainIndex = stationMap.indexOf(train_location);
   if (trainIndex === -1) {
     announcementTextElement.innerText = 'The train location is unknown.';
   } else {
-    // Assuming the third item is the reference station
     const referenceStationIndex = stationMap.indexOf(libp2p.peerId.toString());
     const distance = Math.abs(trainIndex - referenceStationIndex);
     if (distance === 0) {
@@ -370,7 +334,6 @@ function updateMapListUI() {
   stationListElement.replaceChildren(el);
 }
 
-// Function to handle position change
 function changeStationPosition(peerId, stationBefore) {
   updateMap(peerId, stationBefore);
   const topic = DOM.subscribeTopicInput().value;
@@ -385,7 +348,6 @@ DOM.changeStationPositionButton().onclick = () => {
   }
 };
 
-// Function to handle position change
 function fetchStationMap(peerId, fetch_from) {
   const topic = DOM.subscribeTopicInput().value;
   const message = `fetch_map ${peerId} ${fetch_from}`;
@@ -407,6 +369,17 @@ document.getElementById('fetch-data-button').addEventListener('click', async () 
       const response = await fetch(`https://e9qx2wlhrh.execute-api.us-east-1.amazonaws.com/dev/${stationId}`);
       const data = await response.json();
       console.log(data);
+
+      const distance = parseInt(data.Items[0].device_data.M.distance.N, 10);
+      console.log(`distance is: ${distance}`)
+      if (distance <= 10) {
+        const topic = DOM.subscribeTopicInput().value;
+        const message = `train_location ${libp2p.peerId.toString()}`;
+        appendOutput(`Sending message '${clean(message)}'`);
+      
+        await libp2p.services.pubsub.publish(topic, fromString(message));
+      }
+
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
