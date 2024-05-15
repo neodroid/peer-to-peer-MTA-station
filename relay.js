@@ -11,7 +11,7 @@ import { createLibp2p } from 'libp2p'
 
 const server = await createLibp2p({
   addresses: {
-    listen: ['/ip4/172.208.28.210/tcp/0/ws']
+    listen: ['/ip4/172.208.28.210/tcp/46285/ws']
   },
   transports: [
     webSockets({
